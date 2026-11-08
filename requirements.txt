@@ -1,0 +1,7 @@
+pyqt6>=6.12.0
+
+isort>=9.0.2
+pyright>=1.1.414
+black>=26.10.1
+ruff>=0.17.4
+pylint>=4.1.3

@@ -1,0 +1,73 @@
+[tool.isort]
+profile = "black"
+
+[tool.pylint.messages]
+disable = [
+  "missing-module-docstring",
+  "missing-function-docstring",
+  "missing-class-docstring",
+  "too-many-locals",
+  "too-many-branches",
+  "too-many-statements",
+  "too-many-boolean-expressions",
+]
+
+[tool.pylint]
+max-line-length = 145
+
+# Pylint иначе будет утверждать, что пакета `pyqt6` нет
+[tool.pylint.main]
+extension-pkg-allow-list = ["PyQt6"]
+
+[tool.black]
+line-length = 145
+
+[tool.ruff]
+line-length = 145
+
+[tool.ruff.lint]
+select = [
+  "ERA",
+  "YTT",
+  "ASYNC",
+  "S",
+  "BLE",
+  "FBT",
+  "B",
+  "A",
+  "COM",
+  "C4",
+  "DTZ",
+  "EXE",
+  "FIX",
+  "FA",
+  "ISC",
+  "ICN",
+  "LOG",
+  "G",
+  "INP",
+  "PIE",
+  "PT",
+  "Q",
+  "RSE",
+  "RET",
+  "SLF",
+  "SIM",
+  "SLOT",
+  "TID",
+  "TD",
+  "TC",
+  "ARG",
+  "FLY",
+  "I",
+  "PERF",
+  "E",
+  "W",
+  "F",
+  "PGH",
+  "UP",
+  "FURB",
+  "RUF",
+  "TRY",
+]
+ignore = ["TRY003", "S311"]
