@@ -7,34 +7,26 @@ from PyQt6.QtCore import Qt
 from app import features
 
 
-def count_everything_action(directory_path: str, destination: QtWidgets.QVBoxLayout) -> None:
-    label = QtWidgets.QLabel()
-    label.setText(f"Total count of files & directories: {features.count_everything(directory_path)}")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    font = label.font()
-    font.setPixelSize(22)
-    label.setFont(font)
-    destination.addWidget(label)
+def count_stuff_action(directory_path: str, destination: QtWidgets.QVBoxLayout) -> None:
+    result = features.count_stuff(directory_path)
+    for text in (
+        f"Count of files & directories: <b>{result.objects_total:,}</b>",
+        f"Count of files: <b>{result.files_total:,}</b>",
+        f"Count of directories: <b>{result.dirs_total:,}</b>",
+        f"Empty directory count: <b>{result.empty_dir_count:,}</b>",
+        f"Empty file count: <b>{result.empty_file_count:,}</b>",
+        f"Executable file count: <b>{result.executable_file_count:,}</b>",
+    ):
+        label = QtWidgets.QLabel()
 
+        label.setText(text)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-def count_files_action(directory_path: str, destination: QtWidgets.QVBoxLayout) -> None:
-    label = QtWidgets.QLabel()
-    label.setText(f"Total count of files: {features.count_files(directory_path)}")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    font = label.font()
-    font.setPixelSize(22)
-    label.setFont(font)
-    destination.addWidget(label)
+        font = label.font()
+        font.setPixelSize(22)
+        label.setFont(font)
 
-
-def count_directories_action(directory_path: str, destination: QtWidgets.QVBoxLayout) -> None:
-    label = QtWidgets.QLabel()
-    label.setText(f"Total count of directories: {features.count_directories(directory_path)}")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    font = label.font()
-    font.setPixelSize(22)
-    label.setFont(font)
-    destination.addWidget(label)
+        destination.addWidget(label)
 
 
 @dataclass
@@ -43,9 +35,5 @@ class Action:
     callback: Callable[[str, QtWidgets.QVBoxLayout], None]
 
 
-action_array = (
-    Action("Count everything", count_everything_action),
-    Action("Count files", count_files_action),
-    Action("Count directories", count_directories_action),
-)
+action_array = (Action("Count stuff", count_stuff_action),)
 action_registry = {action.name: action for action in action_array}
