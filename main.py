@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 import sys
 
-from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6 import QtWidgets
 
-
-class DDDirStat(QMainWindow):
-    def __init__(self) -> None:
-        super().__init__()
-        self.setGeometry(300, 300, 600, 600)
+from app.ui import main_window
 
 
 def main() -> None:
-    app = QApplication(sys.argv)
-    wnd = DDDirStat()
+    app = QtWidgets.QApplication(sys.argv)
+    wnd = main_window.MainWindow()
     wnd.show()
     sys.exit(app.exec())
 
