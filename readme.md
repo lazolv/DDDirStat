@@ -1,3 +1,3 @@
 # Dreadfully Dank Directory Stats
 
-Analyze directories for something interesting
+This PyQt6 app recursively scans directories and outputs some information. It is inspired by QDirStat.
