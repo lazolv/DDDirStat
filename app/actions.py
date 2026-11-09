@@ -66,7 +66,7 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> Cou
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
 
         if result.objects_total % 123 == 0:
-            set_progress(f"<b>{result.objects_total}</b>")
+            set_progress(f'<span style="color: green; font-weight: bold;">{result.objects_total}</span>')
     return result
 
 
