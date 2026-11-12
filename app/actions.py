@@ -84,7 +84,7 @@ class ModificationDateGraphResult(ComputeResult):
 
         plot_widget.showGrid(x=True, y=True)
         plot_widget.setLabel("left", "Count of files")
-        plot_widget.setLabel("bottom", "Timestamp", units="s")
+        plot_widget.setLabel("bottom", "Timestamp")
 
         plot_widget.plot(self.ox, self.oy)
 
@@ -94,7 +94,7 @@ class ModificationDateGraphResult(ComputeResult):
 def modification_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> ModificationDateGraphResult:
     result = ModificationDateGraphResult()
 
-    modification_date_registry: dict[int, int] = {}  # Timestamp (in seconds) : count of files
+    modification_date_registry: dict[int, int] = {}
     number_scanned = 0
     mod = 1337
     for root, dirnames, filenames in os.walk(directory_path):
