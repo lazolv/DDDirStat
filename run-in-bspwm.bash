@@ -1,7 +1,4 @@
 #!/bin/bash
 # Скрипт для упрощения жизни линуксоидам на bspwm
 
-./main.py &
-sleep 0.7
-bspc node -t floating
-wait
+bspc rule -a "*" -o state=floating && ./main.py
