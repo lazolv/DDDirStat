@@ -26,6 +26,7 @@ class CountStuffResult(ComputeResult):
     empty_dir_count: int = 0
     empty_file_count: int = 0
     executable_file_count: int = 0
+    symlink_count: int = 0
     extension_counts: dict[str, int] = field(default_factory=dict)
 
     def present(self, destination: QtWidgets.QVBoxLayout) -> None:
@@ -36,6 +37,7 @@ class CountStuffResult(ComputeResult):
             f"Empty directory count: <b>{self.empty_dir_count:,}</b>",
             f"Empty file count: <b>{self.empty_file_count:,}</b>",
             f"Executable file count: <b>{self.executable_file_count:,}</b>",
+            f"Symlink count: <b>{self.symlink_count:,}</b>",
         ):
             label = QtWidgets.QLabel()
 
@@ -66,6 +68,8 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> Cou
 
             if any(int(d) % 2 == 1 for d in oct(statinfo.st_mode)[-3:]):
                 result.executable_file_count += 1
+            if oct(statinfo.st_mode)[2:4] == "12":
+                result.symlink_count += 1
 
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
 
