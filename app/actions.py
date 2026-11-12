@@ -83,6 +83,9 @@ class ModificationDateGraphResult(ComputeResult):
         plot_widget = PlotWidget()
 
         plot_widget.showGrid(x=True, y=True)
+        plot_widget.setLabel("left", "Count of files")
+        plot_widget.setLabel("bottom", "Timestamp", units="s")
+
         plot_widget.plot(self.ox, self.oy)
 
         destination.addWidget(plot_widget)
