@@ -5,6 +5,9 @@ from dataclasses import dataclass, field
 
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
+from pyqtgraph import PlotWidget
+
+progress_symbols = ("#----", "-#---", "--#--", "---#-", "----#", "---#-", "--#--", "-#---")
 
 
 @dataclass
@@ -71,10 +74,53 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> Cou
 
 
 @dataclass
+class ModificationDateGraphResult(ComputeResult):
+    ox: list[int] = field(default_factory=list)
+    oy: list[int] = field(default_factory=list)
+
+    def present(self, destination: QtWidgets.QVBoxLayout) -> None:
+        plot_widget = PlotWidget()
+
+        plot_widget.plot(self.ox, self.oy)
+
+        destination.addWidget(plot_widget)
+
+
+def modification_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> ModificationDateGraphResult:
+    result = ModificationDateGraphResult()
+
+    modification_date_registry: dict[int, int] = {}  # Timestamp (in seconds) : count of files
+    number_scanned = 0
+    mod = 4000
+    for root, dirnames, filenames in os.walk(directory_path):
+        for dirname in dirnames:
+            dirpath = os.path.join(root, dirname)
+            mtime = int(os.lstat(dirpath).st_mtime)
+            modification_date_registry[mtime] = modification_date_registry.get(mtime, 0) + 1
+        for filename in filenames:
+            filepath = os.path.join(root, filename)
+            mtime = int(os.lstat(filepath).st_mtime)
+            modification_date_registry[mtime] = modification_date_registry.get(mtime, 0) + 1
+        if number_scanned % mod == 0:
+            set_progress(
+                f'<span style="color: green; font-weight: bold;">{progress_symbols[number_scanned // mod % len(progress_symbols)]}</span>',
+            )
+        number_scanned += len(dirnames) + len(filenames)
+    sorted_entries = sorted(modification_date_registry.items())
+    earliest_timestamp = sorted_entries[0][0]
+    result.ox = [mtime - earliest_timestamp for mtime, _file_count in sorted_entries]
+    result.oy = [file_count for _mtime, file_count in sorted_entries]
+    return result
+
+
+@dataclass
 class Action:
     name: str
     callback: Callable[[str, Callable[[str], None]], ComputeResult]
 
 
-action_array = (Action("Count stuff", count_stuff),)
+action_array = (
+    Action("Count stuff", count_stuff),
+    Action("Modification date graph", modification_date_graph),
+)
 action_registry = {action.name: action for action in action_array}

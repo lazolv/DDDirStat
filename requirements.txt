@@ -1,4 +1,5 @@
 pyqt6>=6.12.0
+pyqtgraph>=0.14.0
 
 isort>=9.0.2
 pyright>=1.1.414
