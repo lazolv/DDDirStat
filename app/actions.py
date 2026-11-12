@@ -55,27 +55,28 @@ class CountStuffResult(ComputeResult):
 def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> CountStuffResult:
     result = CountStuffResult()
     for root, dirnames, filenames in os.walk(directory_path):
-        result.files_total += len(filenames)
         result.dirs_total += len(dirnames)
-        result.objects_total = result.files_total + result.dirs_total
         if dirnames == [] and filenames == []:
             result.empty_dir_count += 1
         for filename in filenames:
             filepath = os.path.join(root, filename)
             extension = os.path.splitext(filename)[1]
             statinfo = os.lstat(filepath)
+            mode = oct(statinfo.st_mode)
 
-            result.empty_file_count += statinfo.st_size == 0
-
-            if any(int(d) % 2 == 1 for d in oct(statinfo.st_mode)[-3:]):
-                result.executable_file_count += 1
-            if oct(statinfo.st_mode)[2:4] == "12":
+            if mode[2:4] == "10":
+                result.files_total += 1
+                result.empty_file_count += statinfo.st_size == 0
+                if any(int(d) % 2 == 1 for d in mode[-3:]):
+                    result.executable_file_count += 1
+            elif mode[2:4] == "12":
                 result.symlink_count += 1
 
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
 
         if result.objects_total % 123 == 0:
             set_progress(f'<span style="color: green; font-weight: bold;">{result.objects_total}</span>')
+        result.objects_total = result.files_total + result.dirs_total
     return result
 
 
