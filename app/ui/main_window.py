@@ -55,7 +55,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.init_ui()
 
     def init_ui(self) -> None:
-        self.setGeometry(300, 300, 800, 600)
+        self.setGeometry(300, 100, 1000, 800)
         self.setWindowTitle("Dreadfully Dank Directory Stats")
 
         self.init_menu()
