@@ -82,6 +82,7 @@ class ModificationDateGraphResult(ComputeResult):
     def present(self, destination: QtWidgets.QVBoxLayout) -> None:
         plot_widget = PlotWidget()
 
+        plot_widget.showGrid(x=True, y=True)
         plot_widget.plot(self.ox, self.oy)
 
         destination.addWidget(plot_widget)
