@@ -7,7 +7,8 @@ from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from pyqtgraph import PlotWidget
 
-progress_symbols = ("#----", "-#---", "--#--", "---#-", "----#", "---#-", "--#--", "-#---")
+PROGRESS_BAR_SIZE = 16
+progress_symbols = ["/" * i + "\\" * (PROGRESS_BAR_SIZE - 1 - i) + "\\" for i in range(PROGRESS_BAR_SIZE)] + ["/" * PROGRESS_BAR_SIZE]
 
 
 @dataclass
@@ -91,7 +92,7 @@ def modification_date_graph(directory_path: str, set_progress: Callable[[str], N
 
     modification_date_registry: dict[int, int] = {}  # Timestamp (in seconds) : count of files
     number_scanned = 0
-    mod = 4000
+    mod = 1337
     for root, dirnames, filenames in os.walk(directory_path):
         for dirname in dirnames:
             dirpath = os.path.join(root, dirname)
