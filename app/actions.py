@@ -3,7 +3,7 @@ from abc import abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from PyQt6 import QtWidgets
+from PyQt6 import QtCharts, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from pyqtgraph import PlotWidget
 
@@ -50,6 +50,33 @@ class CountStuffResult(ComputeResult):
             label.setFont(font)
 
             destination.addWidget(label)
+        most_frequent_extensions = sorted(((c, e) for e, c in self.extension_counts.items()), reverse=True)
+
+        series = QtCharts.QPieSeries()
+        end = min(4, len(most_frequent_extensions))
+        for count, extension in most_frequent_extensions[:end]:
+            series.append(extension, count)
+        if end < len(most_frequent_extensions):
+            series.append("Other", most_frequent_extensions[end][0])
+        for sl in series.slices():
+            sl.setLabelVisible(True)
+            sl.setLabel(f"<b>{"No ext." if sl.label() == "" else sl.label()}</b> ({int(sl.value())})")
+
+        chart = QtCharts.QChart()
+        chart.addSeries(series)
+        chart.setTitle("File extensions")
+        title_font = chart.titleFont()
+        title_font.setPixelSize(22)
+        chart.setTitleFont(title_font)
+        chart.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
+        legend = chart.legend()
+        if legend is None:
+            raise RuntimeError
+        legend.setAlignment(Qt.AlignmentFlag.AlignBottom)
+
+        chart_view = QtCharts.QChartView(chart)
+        chart_view.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        destination.addWidget(chart_view)
 
 
 def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> CountStuffResult:
