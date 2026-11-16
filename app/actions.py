@@ -10,6 +10,7 @@ from pyqtgraph import PlotWidget
 PROGRESS_BAR_SIZE = 16
 progress_symbols = ["/" * i + "\\" * (PROGRESS_BAR_SIZE - 1 - i) + "\\" for i in range(PROGRESS_BAR_SIZE)] + ["/" * PROGRESS_BAR_SIZE]
 progress_symbols = progress_symbols + progress_symbols[::-1][1:-1]
+PIE_CHART_MAX_SLICE_COUNT = 8
 
 
 @dataclass
@@ -53,14 +54,15 @@ class CountStuffResult(ComputeResult):
         most_frequent_extensions = sorted(((c, e) for e, c in self.extension_counts.items()), reverse=True)
 
         series = QtCharts.QPieSeries()
-        end = min(4, len(most_frequent_extensions))
+        end = min(PIE_CHART_MAX_SLICE_COUNT - 1, len(most_frequent_extensions))
         for count, extension in most_frequent_extensions[:end]:
             series.append(extension, count)
         if end < len(most_frequent_extensions):
-            series.append("Other", most_frequent_extensions[end][0])
+            series.append("Other ext.", most_frequent_extensions[end][0])
         for sl in series.slices():
-            sl.setLabelVisible(True)
-            sl.setLabel(f"<b>{"No ext." if sl.label() == "" else sl.label()}</b> ({int(sl.value())})")
+            if sl.percentage() > 30 / 360:
+                sl.setLabelVisible(True)
+            sl.setLabel(f'<b>{"No ext." if sl.label() == "" else sl.label()}</b> ({int(sl.value())})')
 
         chart = QtCharts.QChart()
         chart.addSeries(series)
@@ -68,11 +70,10 @@ class CountStuffResult(ComputeResult):
         title_font = chart.titleFont()
         title_font.setPixelSize(22)
         chart.setTitleFont(title_font)
-        chart.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
         legend = chart.legend()
         if legend is None:
             raise RuntimeError
-        legend.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        legend.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         chart_view = QtCharts.QChartView(chart)
         chart_view.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
