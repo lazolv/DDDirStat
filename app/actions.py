@@ -46,14 +46,14 @@ def modification_date_graph(directory_path: str, set_progress: Callable[[str], N
             stats = os.lstat(dirpath)
             if stats.st_mtime == 0:
                 continue
-            mtime = int(stats.st_mtime / 3600)
+            mtime = round(stats.st_mtime / 3600)
             mtime_reg[mtime] = mtime_reg.get(mtime, 0) + 1
         for filename in filenames:
             filepath = os.path.join(root, filename)
             stats = os.lstat(filepath)
             if stats.st_mtime == 0:
                 continue
-            mtime = int(stats.st_mtime / 3600)
+            mtime = round(stats.st_mtime / 3600)
             mtime_reg[mtime] = mtime_reg.get(mtime, 0) + 1
         if number_scanned % mod == 0:
             slashes = gbl.progress_symbols[number_scanned // mod % len(gbl.progress_symbols)]
