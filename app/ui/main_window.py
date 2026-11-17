@@ -72,6 +72,12 @@ class MainWindow(QtWidgets.QMainWindow):
         select_dir_action.triggered.connect(self.select_directory)
         file_menu.addAction(select_dir_action)
 
+        quit_action = QtGui.QAction("Quit", self)
+        quit_action.setShortcut(QtGui.QKeySequence.StandardKey.Quit)
+        quit_action.setMenuRole(QtGui.QAction.MenuRole.QuitRole)
+        quit_action.triggered.connect(self.close)
+        file_menu.addAction(quit_action)
+
     def acquire_directory(self) -> str:
         while not (directory_path := QtWidgets.QFileDialog.getExistingDirectory(self, "Select a directory to analyze", "")):
             QtWidgets.QMessageBox.critical(self, "Ugh", "It looks like you have *misclicked*. Please try again")
