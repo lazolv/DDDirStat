@@ -37,24 +37,20 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> ar.
 def modification_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> ar.ModificationDateGraphResult:
     result = ar.ModificationDateGraphResult()
 
-    mtime_reg: dict[int, int] = {}
+    timestamp_registry: dict[int, int] = {}
     number_scanned = 0
     mod = 1337
     for root, dirnames, filenames in os.walk(directory_path):
         for dirname in dirnames:
             dirpath = os.path.join(root, dirname)
-            stats = os.lstat(dirpath)
-            if stats.st_mtime == 0:
-                continue
-            mtime = round(stats.st_mtime / 3600)
-            mtime_reg[mtime] = mtime_reg.get(mtime, 0) + 1
+            st = os.lstat(dirpath)
+            timestamp = round(st.st_mtime / 3600)
+            timestamp_registry[timestamp] = timestamp_registry.get(timestamp, 0) + 1
         for filename in filenames:
             filepath = os.path.join(root, filename)
-            stats = os.lstat(filepath)
-            if stats.st_mtime == 0:
-                continue
-            mtime = round(stats.st_mtime / 3600)
-            mtime_reg[mtime] = mtime_reg.get(mtime, 0) + 1
+            st = os.lstat(filepath)
+            timestamp = round(st.st_mtime / 3600)
+            timestamp_registry[timestamp] = timestamp_registry.get(timestamp, 0) + 1
         if number_scanned % mod == 0:
             slashes = gbl.progress_symbols[number_scanned // mod % len(gbl.progress_symbols)]
             set_progress(
@@ -62,14 +58,14 @@ def modification_date_graph(directory_path: str, set_progress: Callable[[str], N
             )
         number_scanned += len(dirnames) + len(filenames)
 
-    earliest_timestamp = min(mtime_reg.keys())
-    latest_timestamp = max(mtime_reg.keys())
+    earliest_timestamp = min(timestamp_registry.keys())
+    latest_timestamp = max(timestamp_registry.keys())
 
     timeline = [0] * (latest_timestamp - earliest_timestamp + 1)
-    for timestamp, file_count in mtime_reg.items():
+    for timestamp, file_count in timestamp_registry.items():
         timeline[timestamp - earliest_timestamp] = file_count
 
-    result.ox = list(range(len(timeline)))
+    result.ox = [(earliest_timestamp + h) * 3600 for h in range(len(timeline))]
     result.oy = timeline
 
     return result

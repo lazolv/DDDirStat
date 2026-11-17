@@ -1,9 +1,9 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
+import pyqtgraph
 from PyQt6 import QtCharts, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
-from pyqtgraph import PlotWidget
 
 from app import gbl
 
@@ -81,7 +81,7 @@ class ModificationDateGraphResult(ComputeResult):
     oy: list[int] = field(default_factory=list)
 
     def present(self, destination: QtWidgets.QVBoxLayout) -> None:
-        plot_widget = PlotWidget()
+        plot_widget = pyqtgraph.PlotWidget(axisItems={"bottom": pyqtgraph.DateAxisItem(orientation="bottom")})
 
         plot_widget.showGrid(x=True, y=True)
         plot_widget.setLabel("left", "Count of files")
