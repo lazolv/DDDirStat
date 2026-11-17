@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets
+from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
 from app import action_results, actions, utl
@@ -62,13 +62,15 @@ class MainWindow(QtWidgets.QMainWindow):
         menu_bar = self.menuBar()
         if menu_bar is None:
             raise RuntimeError
+
         file_menu = menu_bar.addMenu("File")
         if file_menu is None:
             raise RuntimeError
-        select_dir_action = file_menu.addAction("Select a directory")
-        if select_dir_action is None:
-            raise RuntimeError
+
+        select_dir_action = QtGui.QAction("Select a directory", self)
+        select_dir_action.setShortcut(QtGui.QKeySequence("F"))
         select_dir_action.triggered.connect(self.select_directory)
+        file_menu.addAction(select_dir_action)
 
     def acquire_directory(self) -> str:
         while not (directory_path := QtWidgets.QFileDialog.getExistingDirectory(self, "Select a directory to analyze", "")):
