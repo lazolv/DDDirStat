@@ -1,46 +1,9 @@
-from collections.abc import Callable
-
 from PyQt6 import QtWidgets
-from PyQt6.QtCore import QObject, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt
 
-from app import actions, utl
-
-
-class Worker(QThread):
-    progress_changed = pyqtSignal(str)
-    finished = pyqtSignal(actions.ComputeResult)
-
-    def __init__(self, job: Callable[[], actions.ComputeResult], parent: QObject | None = None) -> None:
-        super().__init__(parent)
-        self.job = job
-
-    def run(self) -> None:
-        self.finished.emit(self.job())
-
-
-class ProgressBarWindow(QtWidgets.QDialog):
-    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
-        super().__init__(parent)
-        self.setWindowTitle("What a burden for the CPU")
-        self.setFixedSize(300, 100)
-
-        self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowTitleHint)
-
-        self.setWindowModality(Qt.WindowModality.WindowModal)
-
-        layout = QtWidgets.QVBoxLayout()
-
-        self.label = QtWidgets.QLabel("Hush! A procedure is in progress...", self)
-
-        self.progress_bar = QtWidgets.QProgressBar(self)
-        self.progress_bar.setRange(0, 0)
-
-        self.progress_label = QtWidgets.QLabel(self)
-
-        layout.addWidget(self.label)
-        layout.addWidget(self.progress_bar)
-        layout.addWidget(self.progress_label)
-        self.setLayout(layout)
+from app import action_results, actions, utl
+from app.ui.progress_bar_window import ProgressBarWindow
+from app.worker import Worker
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -128,7 +91,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_wnd = ProgressBarWindow(self)
         self.progress_wnd.show()
 
-        def job() -> actions.ComputeResult:
+        def job() -> action_results.ComputeResult:
             if self.worker is None:
                 raise RuntimeError
             return action.callback(self.directory, self.worker.progress_changed.emit)
@@ -138,7 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.worker.finished.connect(self.finish_action)
         self.worker.start()
 
-    def finish_action(self, result: actions.ComputeResult) -> None:
+    def finish_action(self, result: action_results.ComputeResult) -> None:
         if self.progress_wnd is None:
             raise RuntimeError
         self.progress_wnd.close()
