@@ -89,7 +89,7 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> 
 def find_deceptive_extensions(directory_path: str, set_progress: Callable[[str], None]) -> ar.FindDeceptiveExtensionsResult:
     result = ar.FindDeceptiveExtensionsResult()
 
-    set_progress("No progress is seen for this one!")
+    files_scanned = 0
     for root, _dirnames, filenames in os.walk(directory_path):
         for filename in filenames:
             filepath = os.path.join(root, filename)
@@ -116,6 +116,10 @@ def find_deceptive_extensions(directory_path: str, set_progress: Callable[[str],
                     f"{actual_mime}"
                     "</b>",
                 )
+
+            if files_scanned % 23 == 0:
+                set_progress(f'<span style="color: green; font-weight: bold;">{files_scanned}</span>')
+            files_scanned += 1
     return result
 
 
