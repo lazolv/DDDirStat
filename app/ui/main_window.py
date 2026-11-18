@@ -102,26 +102,32 @@ class MainWindow(QtWidgets.QMainWindow):
         action = actions.action_registry[btn.text()]
 
         self.progress_wnd = ProgressBarWindow(self)
+        self.progress_wnd.on_close = self.cancel_action
         self.progress_wnd.show()
 
         def job() -> action_results.ComputeResult:
             if self.worker is None:
                 raise RuntimeError
-            return action.callback(self.directory, self.worker.progress_changed.emit)
+            return action.callback(self.directory, self.worker.progress_changed.emit, lambda: self.progress_wnd is None)
 
         self.worker = Worker(job)
         self.worker.progress_changed.connect(self.progress_wnd.progress_label.setText)
         self.worker.finished.connect(self.finish_action)
         self.worker.start()
 
-    def finish_action(self, result: action_results.ComputeResult) -> None:
+    def cancel_action(self) -> None:
         if self.progress_wnd is None:
             raise RuntimeError
-        self.progress_wnd.procedure_is_done = True
-        self.progress_wnd.close()
+        # It must be closed at this point
         self.progress_wnd = None
 
-        result.present(self.action_result_layout)
+    def finish_action(self, result: action_results.ComputeResult) -> None:
+        if self.progress_wnd is not None:  # The window is still there so the action must've completed
+            self.progress_wnd.on_close = None
+            self.progress_wnd.close()
+            self.progress_wnd = None
+
+            result.present(self.action_result_layout)
 
         for action_button in self.action_buttons:
             action_button.setEnabled(True)

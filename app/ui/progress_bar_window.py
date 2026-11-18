@@ -1,11 +1,16 @@
+from typing import TYPE_CHECKING
+
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class ProgressBarWindow(QtWidgets.QDialog):
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
-        self.procedure_is_done = False
+        self.on_close: Callable[[], None] | None = None
 
         self.setWindowTitle("What a burden for the CPU")
         self.setFixedSize(300, 100)
@@ -30,10 +35,9 @@ class ProgressBarWindow(QtWidgets.QDialog):
 
     def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
         if event is not None:
-            if self.procedure_is_done:
-                event.accept()
-            else:
-                event.ignore()
+            if self.on_close is not None:
+                self.on_close()
+            event.accept()
 
     def reject(self) -> None:
-        pass
+        self.close()

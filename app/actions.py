@@ -10,7 +10,7 @@ from app import action_results as ar
 from app import gbl, utl
 
 
-def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> ar.CountStuffResult:
+def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: Callable[[], bool]) -> ar.CountStuffResult:
     result = ar.CountStuffResult()
     for root, dirnames, filenames in os.walk(directory_path):
         result.dirs_total += len(dirnames)
@@ -33,12 +33,14 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> ar.
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
 
         if result.objects_total % 123 == 0:
+            if stop():
+                return result
             set_progress(f'<span style="color: green; font-weight: bold;">{result.objects_total}</span>')
         result.objects_total = result.files_total + result.dirs_total
     return result
 
 
-def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> ar.MCADateGraphResult:
+def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], stop: Callable[[], bool]) -> ar.MCADateGraphResult:
     result = ar.MCADateGraphResult()
 
     mtime_registry: dict[int, int] = {}
@@ -61,6 +63,9 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> 
             mtime_registry[mtime] = mtime_registry.get(mtime, 0) + 1
             ctime_registry[ctime] = ctime_registry.get(ctime, 0) + 1
             atime_registry[atime] = atime_registry.get(atime, 0) + 1
+
+        if stop():
+            return result
         slashes = gbl.progress_symbols[int(time.time() * 16) % len(gbl.progress_symbols)]
         set_progress(
             f'<span style="color: green; font-weight: bold;">{slashes}</span>',
@@ -86,7 +91,11 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> 
     return result
 
 
-def find_deceptive_extensions(directory_path: str, set_progress: Callable[[str], None]) -> ar.FindDeceptiveExtensionsResult:
+def find_deceptive_extensions(
+    directory_path: str,
+    set_progress: Callable[[str], None],
+    stop: Callable[[], bool],
+) -> ar.FindDeceptiveExtensionsResult:
     result = ar.FindDeceptiveExtensionsResult()
 
     files_scanned = 0
@@ -118,6 +127,8 @@ def find_deceptive_extensions(directory_path: str, set_progress: Callable[[str],
                 )
 
             if files_scanned % 23 == 0:
+                if stop():
+                    return result
                 set_progress(f'<span style="color: green; font-weight: bold;">{files_scanned}</span>')
             files_scanned += 1
     return result
@@ -126,7 +137,7 @@ def find_deceptive_extensions(directory_path: str, set_progress: Callable[[str],
 @dataclass
 class Action:
     name: str
-    callback: Callable[[str, Callable[[str], None]], ar.ComputeResult]
+    callback: Callable[[str, Callable[[str], None], Callable[[], bool]], ar.ComputeResult]
 
 
 action_array = (
