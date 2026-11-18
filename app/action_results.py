@@ -76,20 +76,34 @@ class CountStuffResult(ComputeResult):
 
 
 @dataclass
-class ModificationDateGraphResult(ComputeResult):
-    ox: list[int] = field(default_factory=list)
-    oy: list[int] = field(default_factory=list)
+class MCADateGraphResult(ComputeResult):
+    m_ox: list[int] = field(default_factory=list)
+    m_oy: list[int] = field(default_factory=list)
+
+    c_ox: list[int] = field(default_factory=list)
+    c_oy: list[int] = field(default_factory=list)
+
+    a_ox: list[int] = field(default_factory=list)
+    a_oy: list[int] = field(default_factory=list)
 
     def present(self, destination: QtWidgets.QVBoxLayout) -> None:
-        plot_widget = pyqtgraph.PlotWidget(axisItems={"bottom": pyqtgraph.DateAxisItem(orientation="bottom")})
+        tab_widget = QtWidgets.QTabWidget()
+        for tab_title, ox, oy, clr in (
+            ("Modification", self.m_ox, self.m_oy, "cyan"),
+            ("Change", self.c_ox, self.c_oy, "magenta"),
+            ("Access", self.a_ox, self.a_oy, "yellow"),
+        ):
+            plot_widget = pyqtgraph.PlotWidget(axisItems={"bottom": pyqtgraph.DateAxisItem(orientation="bottom")})
 
-        plot_widget.showGrid(x=True, y=True)
-        plot_widget.setLabel("left", "Count of files")
-        plot_widget.setLabel("bottom", "Timestamp")
+            plot_widget.showGrid(x=True, y=True)
+            plot_widget.setLabel("left", "Count of files")
+            plot_widget.setLabel("bottom", "Timestamp")
 
-        plot_widget.plot(self.ox, self.oy)
+            plot_widget.plot(ox, oy, pen=clr)
 
-        destination.addWidget(plot_widget)
+            tab_widget.addTab(plot_widget, tab_title)
+
+        destination.addWidget(tab_widget)
 
 
 @dataclass
