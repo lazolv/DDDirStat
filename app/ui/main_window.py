@@ -89,7 +89,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def select_directory(self) -> None:
         self.directory = self.acquire_directory()
         self.cleanup_after_last_action()
-        self.current_directory_label.setText(f"<b>{self.directory}</b>")
+        self.set_action_cancellation(False)
+
+    def update_selected_directory_label(self) -> None:
+        if self.action_canceled:
+            self.current_directory_label.setText(f'<b>{self.directory}</b> <span style="color: red;">*</span>')
+        else:
+            self.current_directory_label.setText(f"<b>{self.directory}</b>")
+
+    def set_action_cancellation(self, to: bool) -> None:  # noqa: FBT001
+        self.action_canceled = to
+        self.update_selected_directory_label()
 
     def begin_action(self) -> None:
         for action_button in self.action_buttons:
@@ -97,7 +107,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.cleanup_after_last_action()
 
-        self.action_canceled = False
+        self.set_action_cancellation(False)
 
         btn = self.sender()
         if not isinstance(btn, QtWidgets.QPushButton):
@@ -123,7 +133,7 @@ class MainWindow(QtWidgets.QMainWindow):
             raise RuntimeError
         # It must be closed at this point
         self.progress_wnd = None
-        self.action_canceled = True
+        self.set_action_cancellation(True)
 
     def finish_action(self, result: action_results.ComputeResult) -> None:
         if not self.action_canceled:
