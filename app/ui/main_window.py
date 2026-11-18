@@ -46,10 +46,12 @@ class MainWindow(QtWidgets.QMainWindow):
         scroll_layout = QtWidgets.QVBoxLayout(scroll_content_widget)
         scroll_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
+        self.action_buttons: list[QtWidgets.QPushButton] = []
         for action_name in actions.action_registry:
             btn = QtWidgets.QPushButton(action_name)
             btn.clicked.connect(self.begin_action)
             scroll_layout.addWidget(btn)
+            self.action_buttons.append(btn)
 
         scroll_area.setWidget(scroll_content_widget)
         rest_of_the_view_layout.addWidget(scroll_area, stretch=1)
@@ -89,6 +91,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.current_directory_label.setText(f"<b>{self.directory}</b>")
 
     def begin_action(self) -> None:
+        for action_button in self.action_buttons:
+            action_button.setEnabled(False)
+
         self.cleanup_after_last_action()
 
         btn = self.sender()
@@ -116,6 +121,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.progress_wnd = None
 
         result.present(self.action_result_layout)
+
+        for action_button in self.action_buttons:
+            action_button.setEnabled(True)
 
     def cleanup_after_last_action(self) -> None:
         utl.clear_layout(self.action_result_layout)
