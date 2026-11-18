@@ -14,6 +14,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.progress_wnd: ProgressBarWindow | None = None
         self.worker: Worker | None = None
+        self.action_canceled = False
 
         self.init_ui()
 
@@ -96,6 +97,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.cleanup_after_last_action()
 
+        self.action_canceled = False
+
         btn = self.sender()
         if not isinstance(btn, QtWidgets.QPushButton):
             raise TypeError
@@ -108,7 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
         def job() -> action_results.ComputeResult:
             if self.worker is None:
                 raise RuntimeError
-            return action.callback(self.directory, self.worker.progress_changed.emit, lambda: self.progress_wnd is None)
+            return action.callback(self.directory, self.worker.progress_changed.emit, lambda: self.action_canceled)
 
         self.worker = Worker(job)
         self.worker.progress_changed.connect(self.progress_wnd.progress_label.setText)
@@ -120,9 +123,12 @@ class MainWindow(QtWidgets.QMainWindow):
             raise RuntimeError
         # It must be closed at this point
         self.progress_wnd = None
+        self.action_canceled = True
 
     def finish_action(self, result: action_results.ComputeResult) -> None:
-        if self.progress_wnd is not None:  # The window is still there so the action must've completed
+        if not self.action_canceled:
+            if self.progress_wnd is None:
+                raise RuntimeError
             self.progress_wnd.on_close = None
             self.progress_wnd.close()
             self.progress_wnd = None
