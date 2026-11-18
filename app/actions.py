@@ -67,6 +67,8 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> 
         )
 
     def make_ox_oy(registry: dict[int, int]) -> tuple[list[int], list[int]]:
+        if not registry:
+            return [], []
         earliest_timestamp = min(registry.keys())
         latest_timestamp = max(registry.keys())
 
