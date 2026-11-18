@@ -1,6 +1,9 @@
+import mimetypes
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
+
+import magic
 
 from app import action_results as ar
 from app import gbl
@@ -71,6 +74,39 @@ def modification_date_graph(directory_path: str, set_progress: Callable[[str], N
     return result
 
 
+def find_deceptive_extensions(directory_path: str, set_progress: Callable[[str], None]) -> ar.FindDeceptiveExtensionsResult:
+    result = ar.FindDeceptiveExtensionsResult()
+
+    set_progress("No progress is seen for this one!")
+    for root, _dirnames, filenames in os.walk(directory_path):
+        for filename in filenames:
+            filepath = os.path.join(root, filename)
+            st = os.lstat(filepath)
+            mode = oct(st.st_mode)
+            if mode[2:4] != "10":
+                continue
+
+            guessed_mime, _encoding = mimetypes.guess_file_type(filepath)
+            actual_mime = magic.from_file(filepath, mime=True)
+            actual_mime_type = actual_mime[: actual_mime.index("/")]
+
+            if (
+                guessed_mime is not None
+                and actual_mime is not None
+                and guessed_mime != actual_mime
+                and actual_mime_type in gbl.INSPECTED_MIME_TYPES
+            ):
+                result.mismatching_extension_and_magic_number_mimes.append(
+                    f'{filepath} <span style="color: blue;">|</span> '
+                    "<b>"
+                    f"{guessed_mime} "
+                    '<span style="color: red;">vs.</span> '
+                    f"{actual_mime}"
+                    "</b>",
+                )
+    return result
+
+
 @dataclass
 class Action:
     name: str
@@ -80,5 +116,6 @@ class Action:
 action_array = (
     Action("Count stuff", count_stuff),
     Action("Modification date graph", modification_date_graph),
+    Action("Find deceptive extensions", find_deceptive_extensions),
 )
 action_registry = {action.name: action for action in action_array}

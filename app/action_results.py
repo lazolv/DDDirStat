@@ -90,3 +90,34 @@ class ModificationDateGraphResult(ComputeResult):
         plot_widget.plot(self.ox, self.oy)
 
         destination.addWidget(plot_widget)
+
+
+@dataclass
+class FindDeceptiveExtensionsResult(ComputeResult):
+    mismatching_extension_and_magic_number_mimes: list[str] = field(default_factory=list)
+
+    def present(self, destination: QtWidgets.QVBoxLayout) -> None:
+        message_one = "Files whose extension is possibly deceptive"
+        message_two = "Found nothing interesting"
+
+        label = QtWidgets.QLabel()
+
+        label.setText(
+            f'<span style="color: blue;">'
+            f"{message_one if len(self.mismatching_extension_and_magic_number_mimes) > 0 else message_two}"
+            "</span>",
+        )
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = label.font()
+        font.setPixelSize(20)
+        label.setFont(font)
+        destination.addWidget(label)
+
+        for string in self.mismatching_extension_and_magic_number_mimes:
+            label = QtWidgets.QLabel()
+            label.setText(string)
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            font = label.font()
+            font.setPixelSize(15)
+            label.setFont(font)
+            destination.addWidget(label)
