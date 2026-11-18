@@ -117,6 +117,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def finish_action(self, result: action_results.ComputeResult) -> None:
         if self.progress_wnd is None:
             raise RuntimeError
+        self.progress_wnd.procedure_is_done = True
         self.progress_wnd.close()
         self.progress_wnd = None
 

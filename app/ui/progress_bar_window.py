@@ -1,10 +1,12 @@
-from PyQt6 import QtWidgets
+from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
 
 class ProgressBarWindow(QtWidgets.QDialog):
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
+        self.procedure_is_done = False
+
         self.setWindowTitle("What a burden for the CPU")
         self.setFixedSize(300, 100)
 
@@ -25,3 +27,13 @@ class ProgressBarWindow(QtWidgets.QDialog):
         layout.addWidget(self.progress_bar)
         layout.addWidget(self.progress_label)
         self.setLayout(layout)
+
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
+        if event is not None:
+            if self.procedure_is_done:
+                event.accept()
+            else:
+                event.ignore()
+
+    def reject(self) -> None:
+        pass
