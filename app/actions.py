@@ -1,5 +1,6 @@
 import mimetypes
 import os
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -41,8 +42,6 @@ def modification_date_graph(directory_path: str, set_progress: Callable[[str], N
     result = ar.ModificationDateGraphResult()
 
     timestamp_registry: dict[int, int] = {}
-    number_scanned = 0
-    mod = 1337
     for root, dirnames, filenames in os.walk(directory_path):
         for dirname in dirnames:
             dirpath = os.path.join(root, dirname)
@@ -54,12 +53,11 @@ def modification_date_graph(directory_path: str, set_progress: Callable[[str], N
             st = os.lstat(filepath)
             timestamp = round(st.st_mtime / 3600)
             timestamp_registry[timestamp] = timestamp_registry.get(timestamp, 0) + 1
-        if number_scanned % mod == 0:
-            slashes = gbl.progress_symbols[number_scanned // mod % len(gbl.progress_symbols)]
-            set_progress(
-                f'<span style="color: green; font-weight: bold;">{slashes}</span>',
-            )
-        number_scanned += len(dirnames) + len(filenames)
+
+        slashes = gbl.progress_symbols[int(time.time() * 16) % len(gbl.progress_symbols)]
+        set_progress(
+            f'<span style="color: green; font-weight: bold;">{slashes}</span>',
+        )
 
     earliest_timestamp = min(timestamp_registry.keys())
     latest_timestamp = max(timestamp_registry.keys())
