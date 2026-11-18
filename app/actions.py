@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import magic
 
 from app import action_results as ar
-from app import gbl
+from app import gbl, utl
 
 
 def count_stuff(directory_path: str, set_progress: Callable[[str], None]) -> ar.CountStuffResult:
@@ -44,6 +44,7 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> 
     mtime_registry: dict[int, int] = {}
     ctime_registry: dict[int, int] = {}
     atime_registry: dict[int, int] = {}
+    btime_registry: dict[int, int] = {}
     for root, dirnames, filenames in os.walk(directory_path):
         for name in dirnames + filenames:
             path = os.path.join(root, name)
@@ -51,6 +52,12 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> 
             mtime = round(st.st_mtime / 3600)
             ctime = round(st.st_ctime / 3600)
             atime = round(st.st_atime / 3600)
+            btime = utl.birth_time(path, st)
+
+            if btime is not None:
+                btime = round(btime / 3600)
+                btime_registry[btime] = btime_registry.get(btime, 0) + 1
+
             mtime_registry[mtime] = mtime_registry.get(mtime, 0) + 1
             ctime_registry[ctime] = ctime_registry.get(ctime, 0) + 1
             atime_registry[atime] = atime_registry.get(atime, 0) + 1
@@ -72,6 +79,7 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None]) -> 
     result.m_ox, result.m_oy = make_ox_oy(mtime_registry)
     result.c_ox, result.c_oy = make_ox_oy(ctime_registry)
     result.a_ox, result.a_oy = make_ox_oy(atime_registry)
+    result.b_ox, result.b_oy = make_ox_oy(btime_registry)
 
     return result
 

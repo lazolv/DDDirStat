@@ -1,3 +1,4 @@
+import platform
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
@@ -86,13 +87,19 @@ class MCADateGraphResult(ComputeResult):
     a_ox: list[int] = field(default_factory=list)
     a_oy: list[int] = field(default_factory=list)
 
+    b_ox: list[int] = field(default_factory=list)
+    b_oy: list[int] = field(default_factory=list)
+
     def present(self, destination: QtWidgets.QVBoxLayout) -> None:
         tab_widget = QtWidgets.QTabWidget()
         for tab_title, ox, oy, clr in (
-            ("Modification", self.m_ox, self.m_oy, "cyan"),
-            ("Change", self.c_ox, self.c_oy, "magenta"),
-            ("Access", self.a_ox, self.a_oy, "yellow"),
+            ("Modification", self.m_ox, self.m_oy, (0, 255, 255)),
+            ("Change", self.c_ox, self.c_oy, (255, 0, 255)),
+            ("Access", self.a_ox, self.a_oy, (255, 255, 0)),
+            ("Birth", self.b_ox, self.b_oy, (0, 255, 0)),
         ):
+            if platform.system() == "Windows" and tab_title == "Change":  # `ctime` is creation time on Windows
+                continue
             plot_widget = pyqtgraph.PlotWidget(axisItems={"bottom": pyqtgraph.DateAxisItem(orientation="bottom")})
 
             plot_widget.showGrid(x=True, y=True)
