@@ -14,6 +14,8 @@ from app import gbl, utl
 def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: Callable[[], bool]) -> ar.CountStuffResult:
     result = ar.CountStuffResult()
     for root, dirnames, filenames in os.walk(directory_path):
+        if gbl.path_is_skipped(root):
+            continue
         result.dirs_total += len(dirnames)
         if dirnames == [] and filenames == []:
             result.empty_dir_count += 1
@@ -51,6 +53,8 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], sto
     atime_registry: dict[int, int] = {}
     btime_registry: dict[int, int] = {}
     for root, dirnames, filenames in os.walk(directory_path):
+        if gbl.path_is_skipped(root):
+            continue
         for name in dirnames + filenames:
             path = os.path.join(root, name)
             try:
@@ -106,6 +110,8 @@ def find_deceptive_extensions(
 
     files_scanned = 0
     for root, _dirnames, filenames in os.walk(directory_path):
+        if gbl.path_is_skipped(root):
+            continue
         for filename in filenames:
             filepath = os.path.join(root, filename)
             try:
