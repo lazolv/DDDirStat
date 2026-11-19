@@ -1,5 +1,6 @@
 import mimetypes
 import os
+import stat
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -19,15 +20,14 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: 
         for filename in filenames:
             filepath = os.path.join(root, filename)
             extension = os.path.splitext(filename)[1]
-            statinfo = os.lstat(filepath)
-            mode = oct(statinfo.st_mode)
+            stat_result = os.lstat(filepath)
 
-            if mode[2:4] == "10":
+            if stat.S_ISREG(stat_result.st_mode):
                 result.files_total += 1
-                result.empty_file_count += statinfo.st_size == 0
-                if any(int(d) % 2 == 1 for d in mode[-3:]):
+                result.empty_file_count += stat_result.st_size == 0
+                if bool(stat_result.st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)):
                     result.executable_file_count += 1
-            elif mode[2:4] == "12":
+            elif stat.S_ISLNK(stat_result.st_mode):
                 result.symlink_count += 1
 
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
@@ -102,9 +102,8 @@ def find_deceptive_extensions(
     for root, _dirnames, filenames in os.walk(directory_path):
         for filename in filenames:
             filepath = os.path.join(root, filename)
-            st = os.lstat(filepath)
-            mode = oct(st.st_mode)
-            if mode[2:4] != "10":
+            stat_result = os.lstat(filepath)
+            if not stat.S_ISREG(stat_result.st_mode):
                 continue
 
             guessed_mime, _encoding = mimetypes.guess_file_type(filepath)
