@@ -20,7 +20,10 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: 
         for filename in filenames:
             filepath = os.path.join(root, filename)
             extension = os.path.splitext(filename)[1]
-            stat_result = os.lstat(filepath)
+            try:
+                stat_result = os.lstat(filepath)
+            except (FileNotFoundError, PermissionError, ProcessLookupError):
+                continue
 
             if stat.S_ISREG(stat_result.st_mode):
                 result.files_total += 1
@@ -50,7 +53,10 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], sto
     for root, dirnames, filenames in os.walk(directory_path):
         for name in dirnames + filenames:
             path = os.path.join(root, name)
-            st = os.lstat(path)
+            try:
+                st = os.lstat(path)
+            except (FileNotFoundError, PermissionError, ProcessLookupError):
+                continue
             mtime = round(st.st_mtime / 3600)
             ctime = round(st.st_ctime / 3600)
             atime = round(st.st_atime / 3600)
@@ -102,7 +108,10 @@ def find_deceptive_extensions(
     for root, _dirnames, filenames in os.walk(directory_path):
         for filename in filenames:
             filepath = os.path.join(root, filename)
-            stat_result = os.lstat(filepath)
+            try:
+                stat_result = os.lstat(filepath)
+            except (FileNotFoundError, PermissionError, ProcessLookupError):
+                continue
             if not stat.S_ISREG(stat_result.st_mode):
                 continue
 
