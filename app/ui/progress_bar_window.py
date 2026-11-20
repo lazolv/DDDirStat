@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
@@ -33,6 +33,7 @@ class ProgressBarWindow(QtWidgets.QDialog):
         layout.addWidget(self.progress_label)
         self.setLayout(layout)
 
+    @override
     def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
         if event is not None:
             if self.on_close is not None:

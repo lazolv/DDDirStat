@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import override
 
 from PyQt6 import QtCore
 
@@ -13,5 +14,6 @@ class Worker(QtCore.QThread):
         super().__init__(parent)
         self.job = job
 
+    @override
     def run(self) -> None:
         self.finished.emit(self.job())
