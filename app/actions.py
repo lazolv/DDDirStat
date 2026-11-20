@@ -37,10 +37,11 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: 
 
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
 
-        if result.objects_total % 123 == 0:
-            if stop():
-                return result
+        if result.objects_total % gbl.COUNT_STUFF_CHECK_STOP_CONDITION_FILE_COUNT_INTERVAL == 0 and stop():
+            return result
+        if result.objects_total % gbl.COUNT_STUFF_SET_PROGRESS_FILE_COUNT_INTERVAL == 0:
             set_progress(f'<span style="color: green; font-weight: bold;">{result.objects_total}</span>')
+
         result.objects_total = result.files_total + result.dirs_total
     return result
 
@@ -140,11 +141,12 @@ def find_deceptive_extensions(
                     "</b>",
                 )
 
-            if files_scanned % 23 == 0:
-                if stop():
-                    return result
-                set_progress(f'<span style="color: green; font-weight: bold;">{files_scanned}</span>')
-            files_scanned += 1
+        if files_scanned % gbl.FIND_DECEPTIVE_EXTENSIONS_CHECK_STOP_CONDITION_FILE_COUNT_INTERVAL == 0 and stop():
+            return result
+        if files_scanned % gbl.FIND_DECEPTIVE_EXTENSIONS_SET_PROGRESS_FILE_COUNT_INTERVAL == 0:
+            set_progress(f'<span style="color: green; font-weight: bold;">{files_scanned}</span>')
+
+        files_scanned += len(filenames)
     return result
 
 
