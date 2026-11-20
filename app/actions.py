@@ -37,9 +37,9 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: 
 
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
 
-        if result.objects_total % gbl.COUNT_STUFF_CHECK_STOP_CONDITION_FILE_COUNT_INTERVAL == 0 and stop():
+        if result.objects_total % gbl.COUNT_STUFF_CHECK_STOP_CONDITION_FILE_COUNT_DIVISOR == 0 and stop():
             return result
-        if result.objects_total % gbl.COUNT_STUFF_SET_PROGRESS_FILE_COUNT_INTERVAL == 0:
+        if result.objects_total % gbl.COUNT_STUFF_SET_PROGRESS_FILE_COUNT_DIVISOR == 0:
             set_progress(f'<span style="color: green; font-weight: bold;">{result.objects_total}</span>')
 
         result.objects_total = result.files_total + result.dirs_total
