@@ -14,24 +14,23 @@ class ProgressBarWindow(QtWidgets.QDialog):
 
         self.setWindowTitle("What a burden for the CPU")
         self.setFixedSize(300, 100)
-
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowTitleHint)
-
         self.setWindowModality(Qt.WindowModality.WindowModal)
 
-        layout = QtWidgets.QVBoxLayout()
+        master_layout = QtWidgets.QVBoxLayout()
+        upper_label = QtWidgets.QLabel("Hush! A procedure is in progress...")
+        progress_bar = self.make_progress_bar()
+        self.progress_label = QtWidgets.QLabel()
 
-        self.label = QtWidgets.QLabel("Hush! A procedure is in progress...", self)
+        master_layout.addWidget(upper_label)
+        master_layout.addWidget(progress_bar)
+        master_layout.addWidget(self.progress_label)
+        self.setLayout(master_layout)
 
-        self.progress_bar = QtWidgets.QProgressBar(self)
-        self.progress_bar.setRange(0, 0)
-
-        self.progress_label = QtWidgets.QLabel(self)
-
-        layout.addWidget(self.label)
-        layout.addWidget(self.progress_bar)
-        layout.addWidget(self.progress_label)
-        self.setLayout(layout)
+    def make_progress_bar(self) -> QtWidgets.QProgressBar:
+        progress_bar = QtWidgets.QProgressBar()
+        progress_bar.setRange(0, 0)
+        return progress_bar
 
     @override
     def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:

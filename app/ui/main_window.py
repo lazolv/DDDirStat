@@ -25,41 +25,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.init_menu()
 
         central_widget = QtWidgets.QWidget()
+        master_layout = QtWidgets.QVBoxLayout()
+        self.current_directory_label = self.make_current_directory_label()
+        main_view_layout = QtWidgets.QHBoxLayout()
+
+        action_list_scroll_area = self.make_action_list_scroll_area()
+        action_list_layout = self.make_action_list_layout()
+        self.action_buttons = self.make_action_buttons()
+
+        self.action_result_layout = QtWidgets.QVBoxLayout()
+
         self.setCentralWidget(central_widget)
-        master_layout = QtWidgets.QVBoxLayout(central_widget)
-
-        self.current_directory_label = QtWidgets.QLabel("No directory is selected. Select one at <b>File > Select a directory</b>", self)
-        self.current_directory_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        font = self.current_directory_label.font()
-        font.setPixelSize(14)
-        self.current_directory_label.setFont(font)
+        central_widget.setLayout(master_layout)
         master_layout.addWidget(self.current_directory_label)
-
-        rest_of_the_view_widget = QtWidgets.QWidget()
-        master_layout.addWidget(rest_of_the_view_widget)
-        rest_of_the_view_layout = QtWidgets.QHBoxLayout(rest_of_the_view_widget)
-
-        scroll_area = QtWidgets.QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-
-        scroll_content_widget = QtWidgets.QWidget()
-        scroll_layout = QtWidgets.QVBoxLayout(scroll_content_widget)
-        scroll_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        self.action_buttons: list[QtWidgets.QPushButton] = []
-        for action_name in actions.action_registry:
-            btn = QtWidgets.QPushButton(action_name)
-            btn.clicked.connect(self.begin_action)
-            scroll_layout.addWidget(btn)
-            self.action_buttons.append(btn)
-
-        scroll_area.setWidget(scroll_content_widget)
-        rest_of_the_view_layout.addWidget(scroll_area, stretch=1)
-
-        action_result_widget = QtWidgets.QWidget()
-        rest_of_the_view_layout.addWidget(action_result_widget, stretch=3)
-        self.action_result_layout = QtWidgets.QVBoxLayout(action_result_widget)
+        master_layout.addLayout(main_view_layout)
+        main_view_layout.addWidget(action_list_scroll_area, stretch=1)
+        action_list_scroll_area.setLayout(action_list_layout)
+        for action_button in self.action_buttons:
+            action_list_layout.addWidget(action_button)
+        main_view_layout.addLayout(self.action_result_layout, stretch=3)
 
     def init_menu(self) -> None:
         menu_bar = self.menuBar()
@@ -80,6 +64,33 @@ class MainWindow(QtWidgets.QMainWindow):
         quit_action.setMenuRole(QtGui.QAction.MenuRole.QuitRole)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
+
+    def make_current_directory_label(self) -> QtWidgets.QLabel:
+        current_directory_label = QtWidgets.QLabel("No directory is selected. Select one at <b>File > Select a directory</b>", self)
+        current_directory_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = current_directory_label.font()
+        font.setPixelSize(14)
+        current_directory_label.setFont(font)
+        return current_directory_label
+
+    def make_action_list_layout(self) -> QtWidgets.QVBoxLayout:
+        action_list_layout = QtWidgets.QVBoxLayout()
+        action_list_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        return action_list_layout
+
+    def make_action_list_scroll_area(self) -> QtWidgets.QScrollArea:
+        action_list_scroll_area = QtWidgets.QScrollArea()
+        action_list_scroll_area.setWidgetResizable(True)
+        action_list_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        return action_list_scroll_area
+
+    def make_action_buttons(self) -> list[QtWidgets.QPushButton]:
+        action_buttons: list[QtWidgets.QPushButton] = []
+        for action_name in actions.action_registry:
+            button = QtWidgets.QPushButton(action_name)
+            button.clicked.connect(self.begin_action)
+            action_buttons.append(button)
+        return action_buttons
 
     def acquire_directory(self) -> str:
         while not (directory_path := QtWidgets.QFileDialog.getExistingDirectory(self, "Select a directory to analyze", "")):
