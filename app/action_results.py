@@ -28,13 +28,14 @@ class CountStuffResult(ComputeResult):
     extension_counts: dict[str, int] = field(default_factory=dict)
 
     def present(self, destination: QtWidgets.QVBoxLayout) -> None:
+        injected_windows_note = ' <span style="color: #B8860B;">(unreliable on Windows)</span>' if platform.system() == "Windows" else ""
         for text in (
             f"Count of files & directories: <b>{self.objects_total:,}</b>",
             f"Count of files: <b>{self.files_total:,}</b>",
             f"Count of directories: <b>{self.dirs_total:,}</b>",
             f"Empty directory count: <b>{self.empty_dir_count:,}</b>",
             f"Empty file count: <b>{self.empty_file_count:,}</b>",
-            f"Executable file count: <b>{self.executable_file_count:,}</b>",
+            f"Executable file count{injected_windows_note}: <b>{self.executable_file_count:,}</b>",
             f"Symlink count: <b>{self.symlink_count:,}</b>",
         ):
             label = QtWidgets.QLabel()
