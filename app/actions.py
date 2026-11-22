@@ -117,14 +117,13 @@ def find_deceptive_extensions(
             filepath = os.path.join(root, filename)
             try:
                 stat_result = os.lstat(filepath)
+                if not stat.S_ISREG(stat_result.st_mode):
+                    continue
+                guessed_mime, _encoding = mimetypes.guess_file_type(filepath)
+                actual_mime = magic.from_file(filepath, mime=True)
+                actual_mime_type = actual_mime[: actual_mime.index("/")]
             except (FileNotFoundError, PermissionError, ProcessLookupError):
                 continue
-            if not stat.S_ISREG(stat_result.st_mode):
-                continue
-
-            guessed_mime, _encoding = mimetypes.guess_file_type(filepath)
-            actual_mime = magic.from_file(filepath, mime=True)
-            actual_mime_type = actual_mime[: actual_mime.index("/")]
 
             if (
                 guessed_mime is not None
