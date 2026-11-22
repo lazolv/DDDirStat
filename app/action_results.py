@@ -39,15 +39,14 @@ class CountStuffResult(ComputeResult):
             f"Symlink count: <b>{self.symlink_count:,}</b>",
         ):
             label = QtWidgets.QLabel()
-
             label.setText(text)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
+            label.setWordWrap(True)
             font = label.font()
             font.setPixelSize(22)
             label.setFont(font)
-
             destination.addWidget(label)
+
         most_frequent_extensions = sorted(((c, e) for e, c in self.extension_counts.items()), reverse=True)
 
         series = QtCharts.QPieSeries()
@@ -123,13 +122,13 @@ class FindDeceptiveExtensionsResult(ComputeResult):
         message_two = "Found nothing interesting"
 
         title_label = QtWidgets.QLabel()
-
         title_label.setText(
             f'<span style="color: blue;">'
             f"{message_one if len(self.mismatching_extension_and_magic_number_mimes) > 0 else message_two}"
             "</span>",
         )
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_label.setWordWrap(True)
         font = title_label.font()
         font.setPixelSize(20)
         title_label.setFont(font)
@@ -139,6 +138,7 @@ class FindDeceptiveExtensionsResult(ComputeResult):
             label = QtWidgets.QLabel()
             label.setText(string)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label.setWordWrap(True)
             font = label.font()
             font.setPixelSize(15)
             label.setFont(font)
