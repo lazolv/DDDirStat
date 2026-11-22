@@ -30,20 +30,29 @@ class MainWindow(QtWidgets.QMainWindow):
         main_view_layout = QtWidgets.QHBoxLayout()
 
         action_list_scroll_area = self.make_action_list_scroll_area()
+        action_list_widget = QtWidgets.QWidget()
         action_list_layout = self.make_action_list_layout()
         self.action_buttons = self.make_action_buttons()
 
+        action_result_scroll_area = self.make_action_result_scroll_area()
+        action_result_widget = QtWidgets.QWidget()
         self.action_result_layout = QtWidgets.QVBoxLayout()
 
+        # Parenting the widgets
         self.setCentralWidget(central_widget)
         central_widget.setLayout(master_layout)
         master_layout.addWidget(self.current_directory_label)
         master_layout.addLayout(main_view_layout)
-        main_view_layout.addWidget(action_list_scroll_area, stretch=1)
-        action_list_scroll_area.setLayout(action_list_layout)
+
+        action_list_widget.setLayout(action_list_layout)
         for action_button in self.action_buttons:
             action_list_layout.addWidget(action_button)
-        main_view_layout.addLayout(self.action_result_layout, stretch=3)
+        action_list_scroll_area.setWidget(action_list_widget)
+        main_view_layout.addWidget(action_list_scroll_area, stretch=1)
+
+        action_result_widget.setLayout(self.action_result_layout)
+        action_result_scroll_area.setWidget(action_result_widget)
+        main_view_layout.addWidget(action_result_scroll_area, stretch=3)
 
     def init_menu(self) -> None:
         menu_bar = self.menuBar()
@@ -81,7 +90,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def make_action_list_scroll_area(self) -> QtWidgets.QScrollArea:
         action_list_scroll_area = QtWidgets.QScrollArea()
         action_list_scroll_area.setWidgetResizable(True)
-        action_list_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         return action_list_scroll_area
 
     def make_action_buttons(self) -> list[QtWidgets.QPushButton]:
@@ -91,6 +99,11 @@ class MainWindow(QtWidgets.QMainWindow):
             button.clicked.connect(self.begin_action)
             action_buttons.append(button)
         return action_buttons
+
+    def make_action_result_scroll_area(self) -> QtWidgets.QScrollArea:
+        action_result_scroll_area = QtWidgets.QScrollArea()
+        action_result_scroll_area.setWidgetResizable(True)
+        return action_result_scroll_area
 
     def acquire_directory(self) -> str:
         while not (directory_path := QtWidgets.QFileDialog.getExistingDirectory(self, "Select a directory to analyze", "")):

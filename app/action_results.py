@@ -41,7 +41,6 @@ class CountStuffResult(ComputeResult):
             label = QtWidgets.QLabel()
             label.setText(text)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            label.setWordWrap(True)
             font = label.font()
             font.setPixelSize(22)
             label.setFont(font)
@@ -128,7 +127,6 @@ class FindDeceptiveExtensionsResult(ComputeResult):
             "</span>",
         )
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setWordWrap(True)
         font = title_label.font()
         font.setPixelSize(20)
         title_label.setFont(font)
@@ -138,7 +136,6 @@ class FindDeceptiveExtensionsResult(ComputeResult):
             label = QtWidgets.QLabel()
             label.setText(string)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            label.setWordWrap(True)
             font = label.font()
             font.setPixelSize(15)
             label.setFont(font)
