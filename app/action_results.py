@@ -122,18 +122,18 @@ class FindDeceptiveExtensionsResult(ComputeResult):
         message_one = "Files whose extension is possibly deceptive"
         message_two = "Found nothing interesting"
 
-        label = QtWidgets.QLabel()
+        title_label = QtWidgets.QLabel()
 
-        label.setText(
+        title_label.setText(
             f'<span style="color: blue;">'
             f"{message_one if len(self.mismatching_extension_and_magic_number_mimes) > 0 else message_two}"
             "</span>",
         )
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        font = label.font()
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = title_label.font()
         font.setPixelSize(20)
-        label.setFont(font)
-        destination.addWidget(label)
+        title_label.setFont(font)
+        destination.addWidget(title_label)
 
         for string in self.mismatching_extension_and_magic_number_mimes:
             label = QtWidgets.QLabel()
