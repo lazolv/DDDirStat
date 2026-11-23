@@ -13,9 +13,28 @@ from app import gbl, utl
 
 def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: Callable[[], bool]) -> ar.CountStuffResult:
     result = ar.CountStuffResult()
+
+    objects_scanned = 0
+    times_progress_updated = 0
+    time_of_start = time.time()
+    last_scaled_timepoint: int = -1
+    TIMEPOINT_SCALE_FACTOR = 16
+
     for root, dirnames, filenames in os.walk(directory_path):
+        if stop():
+            return result
         if gbl.path_is_skipped(root):
             continue
+
+        new_scaled_timepoint = int((time.time() - time_of_start) * TIMEPOINT_SCALE_FACTOR)
+        if new_scaled_timepoint != last_scaled_timepoint:
+            last_scaled_timepoint = new_scaled_timepoint
+            slashes = gbl.progress_symbols[times_progress_updated % len(gbl.progress_symbols)]
+            set_progress(
+                f'<span style="color: green; font-weight: bold;">{slashes} {objects_scanned}</span>',
+            )
+            times_progress_updated += 1
+
         result.dirs_total += len(dirnames)
         if dirnames == [] and filenames == []:
             result.empty_dir_count += 1
@@ -36,13 +55,9 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: 
                 result.symlink_count += 1
 
             result.extension_counts[extension] = result.extension_counts.get(extension, 0) + 1
+        objects_scanned = result.files_total + result.dirs_total
 
-        if result.objects_total % gbl.COUNT_STUFF_CHECK_STOP_CONDITION_FILE_COUNT_DIVISOR == 0 and stop():
-            return result
-        if result.objects_total % gbl.COUNT_STUFF_SET_PROGRESS_FILE_COUNT_DIVISOR == 0:
-            set_progress(f'<span style="color: green; font-weight: bold;">{result.objects_total}</span>')
-
-        result.objects_total = result.files_total + result.dirs_total
+    result.objects_total = objects_scanned
     return result
 
 
@@ -53,9 +68,28 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], sto
     ctime_registry: dict[int, int] = {}
     atime_registry: dict[int, int] = {}
     btime_registry: dict[int, int] = {}
+
+    objects_scanned = 0
+    times_progress_updated = 0
+    time_of_start = time.time()
+    last_scaled_timepoint: int = -1
+    TIMEPOINT_SCALE_FACTOR = 16
+
     for root, dirnames, filenames in os.walk(directory_path):
+        if stop():
+            return result
         if gbl.path_is_skipped(root):
             continue
+
+        new_scaled_timepoint = int((time.time() - time_of_start) * TIMEPOINT_SCALE_FACTOR)
+        if new_scaled_timepoint != last_scaled_timepoint:
+            last_scaled_timepoint = new_scaled_timepoint
+            slashes = gbl.progress_symbols[times_progress_updated % len(gbl.progress_symbols)]
+            set_progress(
+                f'<span style="color: green; font-weight: bold;">{slashes} {objects_scanned}</span>',
+            )
+            times_progress_updated += 1
+
         for name in dirnames + filenames:
             path = os.path.join(root, name)
             try:
@@ -74,13 +108,7 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], sto
             mtime_registry[mtime] = mtime_registry.get(mtime, 0) + 1
             ctime_registry[ctime] = ctime_registry.get(ctime, 0) + 1
             atime_registry[atime] = atime_registry.get(atime, 0) + 1
-
-        if stop():
-            return result
-        slashes = gbl.progress_symbols[int(time.time() * 16) % len(gbl.progress_symbols)]
-        set_progress(
-            f'<span style="color: green; font-weight: bold;">{slashes}</span>',
-        )
+        objects_scanned += len(dirnames) + len(filenames)
 
     def make_ox_oy(registry: dict[int, int]) -> tuple[list[int], list[int]]:
         if not registry:
@@ -110,9 +138,26 @@ def find_deceptive_extensions(
     result = ar.FindDeceptiveExtensionsResult()
 
     files_scanned = 0
+    times_progress_updated = 0
+    time_of_start = time.time()
+    last_scaled_timepoint: int = -1
+    TIMEPOINT_SCALE_FACTOR = 16
+
     for root, _dirnames, filenames in os.walk(directory_path):
+        if stop():
+            return result
         if gbl.path_is_skipped(root):
             continue
+
+        new_scaled_timepoint = int((time.time() - time_of_start) * TIMEPOINT_SCALE_FACTOR)
+        if new_scaled_timepoint != last_scaled_timepoint:
+            last_scaled_timepoint = new_scaled_timepoint
+            slashes = gbl.progress_symbols[times_progress_updated % len(gbl.progress_symbols)]
+            set_progress(
+                f'<span style="color: green; font-weight: bold;">{slashes} {files_scanned}</span>',
+            )
+            times_progress_updated += 1
+
         for filename in filenames:
             filepath = os.path.join(root, filename)
             try:
@@ -139,12 +184,6 @@ def find_deceptive_extensions(
                     f"{actual_mime}"
                     "</b>",
                 )
-
-        if files_scanned % gbl.FIND_DECEPTIVE_EXTENSIONS_CHECK_STOP_CONDITION_FILE_COUNT_INTERVAL == 0 and stop():
-            return result
-        if files_scanned % gbl.FIND_DECEPTIVE_EXTENSIONS_SET_PROGRESS_FILE_COUNT_INTERVAL == 0:
-            set_progress(f'<span style="color: green; font-weight: bold;">{files_scanned}</span>')
-
         files_scanned += len(filenames)
     return result
 
