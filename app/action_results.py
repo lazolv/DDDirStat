@@ -6,7 +6,7 @@ import pyqtgraph
 from PyQt6 import QtCharts, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
-from app import gbl
+COUNT_STUFF_PIE_CHART_MAX_SLICE_COUNT = 8
 
 
 @dataclass
@@ -49,7 +49,7 @@ class CountStuffResult(ComputeResult):
         most_frequent_extensions = sorted(((c, e) for e, c in self.extension_counts.items()), reverse=True)
 
         series = QtCharts.QPieSeries()
-        end = min(gbl.PIE_CHART_MAX_SLICE_COUNT - 1, len(most_frequent_extensions))
+        end = min(COUNT_STUFF_PIE_CHART_MAX_SLICE_COUNT - 1, len(most_frequent_extensions))
         for count, extension in most_frequent_extensions[:end]:
             series.append(extension, count)
         if end < len(most_frequent_extensions):

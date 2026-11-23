@@ -1,6 +1,9 @@
 import time
 
-from app import gbl
+PROGRESS_BAR_SIZE = 16
+
+progress_symbols = ["/" * i + "\\" * (PROGRESS_BAR_SIZE - 1 - i) + "\\" for i in range(PROGRESS_BAR_SIZE)] + ["/" * PROGRESS_BAR_SIZE]
+progress_symbols = progress_symbols + progress_symbols[::-1][1:-1]
 
 
 class Progress:
@@ -15,7 +18,7 @@ class Progress:
         new_scaled_timepoint = int((time.time() - self.time_of_start) * self.timepoint_scale_factor)
         if new_scaled_timepoint != self.last_scaled_timepoint:
             self.last_scaled_timepoint = new_scaled_timepoint
-            slashes = gbl.progress_symbols[self.ticks_elapsed % len(gbl.progress_symbols)]
+            slashes = progress_symbols[self.ticks_elapsed % len(progress_symbols)]
             self.ticks_elapsed += 1
             return f'<span style="color: green; font-weight: bold;">{slashes} {progress}</span>'
         return None

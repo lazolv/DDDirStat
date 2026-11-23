@@ -7,8 +7,14 @@ from dataclasses import dataclass
 import magic
 
 from app import action_results as ar
-from app import gbl, utl
+from app import utl
 from app.progress import Progress
+
+SKIPPED_DIRS = ("/proc", "/sys", "/dev", "/tmp")  # noqa: S108
+
+
+def path_is_skipped(path: str) -> bool:
+    return any(path.startswith(skipped_dir) for skipped_dir in SKIPPED_DIRS)
 
 
 def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: Callable[[], bool]) -> ar.CountStuffResult:
@@ -19,7 +25,7 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: 
     for root, dirnames, filenames in os.walk(directory_path):
         if stop():
             return result
-        if gbl.path_is_skipped(root):
+        if path_is_skipped(root):
             continue
         if (string := progress.tick(objects_scanned)) is not None:
             set_progress(string)
@@ -63,7 +69,7 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], sto
     for root, dirnames, filenames in os.walk(directory_path):
         if stop():
             return result
-        if gbl.path_is_skipped(root):
+        if path_is_skipped(root):
             continue
         if (string := progress.tick(objects_scanned)) is not None:
             set_progress(string)
@@ -108,6 +114,9 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], sto
     return result
 
 
+FIND_DECEPTIVE_EXTENSIONS_INSPECTED_MIME_TYPES = ("image", "video")
+
+
 def find_deceptive_extensions(
     directory_path: str,
     set_progress: Callable[[str], None],
@@ -120,7 +129,7 @@ def find_deceptive_extensions(
     for root, _dirnames, filenames in os.walk(directory_path):
         if stop():
             return result
-        if gbl.path_is_skipped(root):
+        if path_is_skipped(root):
             continue
         if (string := progress.tick(files_scanned)) is not None:
             set_progress(string)
@@ -141,7 +150,7 @@ def find_deceptive_extensions(
                 guessed_mime is not None
                 and actual_mime is not None
                 and guessed_mime != actual_mime
-                and actual_mime_type in gbl.INSPECTED_MIME_TYPES
+                and actual_mime_type in FIND_DECEPTIVE_EXTENSIONS_INSPECTED_MIME_TYPES
             ):
                 result.mismatching_extension_and_magic_number_mimes.append(
                     f'{filepath} <span style="color: blue;">|</span> '
