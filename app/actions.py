@@ -1,7 +1,6 @@
 import mimetypes
 import os
 import stat
-import time
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -9,31 +8,21 @@ import magic
 
 from app import action_results as ar
 from app import gbl, utl
+from app.progress import Progress
 
 
 def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: Callable[[], bool]) -> ar.CountStuffResult:
     result = ar.CountStuffResult()
+    progress = Progress(16)
 
     objects_scanned = 0
-    times_progress_updated = 0
-    time_of_start = time.time()
-    last_scaled_timepoint: int = -1
-    TIMEPOINT_SCALE_FACTOR = 16
-
     for root, dirnames, filenames in os.walk(directory_path):
         if stop():
             return result
         if gbl.path_is_skipped(root):
             continue
-
-        new_scaled_timepoint = int((time.time() - time_of_start) * TIMEPOINT_SCALE_FACTOR)
-        if new_scaled_timepoint != last_scaled_timepoint:
-            last_scaled_timepoint = new_scaled_timepoint
-            slashes = gbl.progress_symbols[times_progress_updated % len(gbl.progress_symbols)]
-            set_progress(
-                f'<span style="color: green; font-weight: bold;">{slashes} {objects_scanned}</span>',
-            )
-            times_progress_updated += 1
+        if (string := progress.tick(objects_scanned)) is not None:
+            set_progress(string)
 
         result.dirs_total += len(dirnames)
         if dirnames == [] and filenames == []:
@@ -63,6 +52,7 @@ def count_stuff(directory_path: str, set_progress: Callable[[str], None], stop: 
 
 def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], stop: Callable[[], bool]) -> ar.MCADateGraphResult:
     result = ar.MCADateGraphResult()
+    progress = Progress(16)
 
     mtime_registry: dict[int, int] = {}
     ctime_registry: dict[int, int] = {}
@@ -70,25 +60,13 @@ def mca_date_graph(directory_path: str, set_progress: Callable[[str], None], sto
     btime_registry: dict[int, int] = {}
 
     objects_scanned = 0
-    times_progress_updated = 0
-    time_of_start = time.time()
-    last_scaled_timepoint: int = -1
-    TIMEPOINT_SCALE_FACTOR = 16
-
     for root, dirnames, filenames in os.walk(directory_path):
         if stop():
             return result
         if gbl.path_is_skipped(root):
             continue
-
-        new_scaled_timepoint = int((time.time() - time_of_start) * TIMEPOINT_SCALE_FACTOR)
-        if new_scaled_timepoint != last_scaled_timepoint:
-            last_scaled_timepoint = new_scaled_timepoint
-            slashes = gbl.progress_symbols[times_progress_updated % len(gbl.progress_symbols)]
-            set_progress(
-                f'<span style="color: green; font-weight: bold;">{slashes} {objects_scanned}</span>',
-            )
-            times_progress_updated += 1
+        if (string := progress.tick(objects_scanned)) is not None:
+            set_progress(string)
 
         for name in dirnames + filenames:
             path = os.path.join(root, name)
@@ -136,27 +114,16 @@ def find_deceptive_extensions(
     stop: Callable[[], bool],
 ) -> ar.FindDeceptiveExtensionsResult:
     result = ar.FindDeceptiveExtensionsResult()
+    progress = Progress(16)
 
     files_scanned = 0
-    times_progress_updated = 0
-    time_of_start = time.time()
-    last_scaled_timepoint: int = -1
-    TIMEPOINT_SCALE_FACTOR = 16
-
     for root, _dirnames, filenames in os.walk(directory_path):
         if stop():
             return result
         if gbl.path_is_skipped(root):
             continue
-
-        new_scaled_timepoint = int((time.time() - time_of_start) * TIMEPOINT_SCALE_FACTOR)
-        if new_scaled_timepoint != last_scaled_timepoint:
-            last_scaled_timepoint = new_scaled_timepoint
-            slashes = gbl.progress_symbols[times_progress_updated % len(gbl.progress_symbols)]
-            set_progress(
-                f'<span style="color: green; font-weight: bold;">{slashes} {files_scanned}</span>',
-            )
-            times_progress_updated += 1
+        if (string := progress.tick(files_scanned)) is not None:
+            set_progress(string)
 
         for filename in filenames:
             filepath = os.path.join(root, filename)
